@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad de Reforzamiento: Precálculo - Tercer Examen Parcial</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e67e22;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --gray: #95a5a6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f7f6; color: #333; line-height: 1.6; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: var(--primary); color: #fff; padding: 25px; text-align: center; }
+        header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        header h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; }
+        section { padding: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1rem; margin-bottom: 10px; box-sizing: border-box; }
+        .btn { display: inline-block; background: var(--secondary); color: #fff; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background 0.3s; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #d35400; }
+        .btn:disabled { background: var(--gray); cursor: not-allowed; }
+        .btn-next { background: var(--primary); }
+        .btn-next:hover { background: #1a252f; }
+        
+        .stats-bar { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; flex-wrap: wrap; gap: 10px; }
+        .stat-item span { color: var(--secondary); }
+        .progress-container { height: 8px; background: #e0e0e0; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.4s ease; }
+        
+        .question-box { margin-bottom: 20px; }
+        .question-text { font-size: 1.1rem; margin-bottom: 20px; font-weight: 500; background: #fdfefe; padding: 15px; border-radius: 8px; border-left: 5px solid var(--secondary); }
+        .options { display: grid; gap: 8px; }
+        .option-btn { padding: 12px; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 1rem; width: 100%; }
+        .option-btn:hover:not(.disabled) { border-color: var(--secondary); background: #fef5e7; }
+        .option-btn.selected { border-color: var(--secondary); background: #fdebd0; font-weight: 600; }
+        .option-btn.correct { border-color: var(--success); background: #d5f5e3; }
+        .option-btn.incorrect { border-color: var(--danger); background: #fadbd8; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+        
+        .feedback { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; }
+        .feedback.correct { background: #d5f5e3; color: #145a32; border: 1px solid #27ae60; }
+        .feedback.incorrect { background: #fadbd8; color: #7b241c; border: 1px solid #e74c3c; }
+        
+        .results-box { text-align: center; }
+        .score-circle { width: 120px; height: 120px; background: var(--secondary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; margin: 20px auto; }
+        .hidden { display: none !important; }
+        
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            section { padding: 15px; }
+            .option-btn { font-size: 0.95rem; padding: 10px; }
+            .stats-bar { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Actividad de Reforzamiento</h1>
+        <h2>Precálculo | Tercer Examen Parcial</h2>
+    </header>
+
+    <section id="registro">
+        <div class="form-group">
+            <label for="nombre">Nombre del Estudiante</label>
+            <input type="text" id="nombre" placeholder="Tu nombre completo">
+            <label for="fecha">Fecha de Realización</label>
+            <input type="date" id="fecha">
+        </div>
+        <button class="btn" onclick="startQuiz()">Iniciar Evaluación</button>
+    </section>
+
+    <section id="actividad" class="hidden">
+        <div class="stats-bar">
+            <div class="stat-item">✅ <span id="correct-count">0</span></div>
+            <div class="stat-item">❌ <span id="error-count">0</span>/10</div>
+            <div class="stat-item">📊 <span id="progress-pct">0%</span></div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div id="question-container">
+            <div class="question-box">
+                <p class="question-text" id="q-text"></p>
+                <div class="options" id="options-container"></div>
+                <div id="feedback" class="feedback"></div>
+            </div>
+            <button class="btn btn-next" id="btn-next" onclick="nextQuestion()" disabled>Siguiente</button>
+        </div>
+    </section>
+
+    <section id="resultados" class="hidden">
+        <div class="results-box">
+            <h2>Resultado para <span id="student-name-display"></span></h2>
+            <div class="score-circle" id="final-score">0%</div>
+            <div id="personal-message" style="margin: 20px 0; font-size: 1.1rem;"></div>
+            <button class="btn" onclick="location.reload()">Reiniciar Actividad</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    // 30 reactivos basados en el Tercer Examen Parcial de Precálculo
+    const questions = [
+        // ==================== OPERACIONES BÁSICAS (P1-P3) ====================
+        {
+            q: "Calcula: $\\frac{3}{4} + \\frac{2}{5} - \\frac{1}{2}$",
+            options: ["$\\frac{9}{20}$", "$\\frac{21}{20}$", "$\\frac{15}{8}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "MCM de 4, 5, 2 es 20. $\\frac{3(5)}{20} + \\frac{2(4)}{20} - \\frac{1(10)}{20} = \\frac{15 + 8 - 10}{20} = \\frac{13}{20}$. Ninguna opción coincide. Respuesta: d) Otra respuesta ($\\frac{13}{20}$)."
+        },
+        {
+            q: "Realiza la operación: $3.45 \\times 2.1 - 1.5$",
+            options: ["$5.745$", "$5.895$", "$7.245$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$3.45 \\times 2.1 = 7.245$. $7.245 - 1.5 = 5.745$."
+        },
+        {
+            q: "Convierte a notación científica: $0.00000456$",
+            options: ["$4.56 \\times 10^{-6}$", "$4.56 \\times 10^{-5}$", "$4.56 \\times 10^{6}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "El punto decimal se mueve 6 lugares a la derecha: $4.56 \\times 10^{-6}$."
+        },
+
+        // ==================== PORCENTAJES Y FRACCIONES (P4-P5) ====================
+        {
+            q: "¿Cuál es el 25% de 480?",
+            options: ["$120$", "$100$", "$140$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$480 \\times 0.25 = 120$."
+        },
+        {
+            q: "Convierte a fracción: $0.\\overline{3}$",
+            options: ["$\\frac{1}{3}$", "$\\frac{3}{10}$", "$\\frac{1}{2}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$0.\\overline{3} = \\frac{1}{3}$ es un decimal periódico puro."
+        },
+
+        // ==================== EXPONENTES Y PRODUCTOS NOTABLES (P6-P7) ====================
+        {
+            q: "Simplifica: $\\frac{2^5 \\cdot 2^3}{2^4}$",
+            options: ["$16$", "$32$", "$8$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$\\frac{2^{5+3}}{2^4} = \\frac{2^8}{2^4} = 2^{8-4} = 2^4 = 16$."
+        },
+        {
+            q: "Desarrolla el producto notable: $(x + 3)^2$",
+            options: ["$x^2 + 6x + 9$", "$x^2 + 9$", "$x^2 + 3x + 9$", "Otra respuesta"],
+            correct: 0,
+            explanation: "Binomio al cuadrado: $(x+3)^2 = x^2 + 2(3)x + 3^2 = x^2 + 6x + 9$."
+        },
+
+        // ==================== PLANO CARTESIANO (P8-P10) ====================
+        {
+            q: "¿Cuál es la ubicación en el plano cartesiano del punto con abscisa 2 y ordenada 3?",
+            options: ["$(3, 2)$", "$(2, 3)$", "$(-2, 3)$", "Otra respuesta"],
+            correct: 1,
+            explanation: "La abscisa es la coordenada $x$ y la ordenada es la coordenada $y$. El punto es $(2, 3)$."
+        },
+        {
+            q: "Identifica las coordenadas del punto marcado en el plano (2 unidades a la izquierda, 2 unidades arriba).",
+            options: ["$(2, -2)$", "$(-2, 2)$", "$(2, 2)$", "Otra respuesta"],
+            correct: 1,
+            explanation: "2 unidades a la izquierda = $x = -2$. 2 unidades arriba = $y = 2$. El punto es $(-2, 2)$."
+        },
+        {
+            q: "Calcula la pendiente de la recta entre $A(1, 2)$ y $B(3, -2)$.",
+            options: ["$m = -2$", "$m = 3$", "$m = \\frac{1}{2}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$m = \\frac{y_2 - y_1}{x_2 - x_1} = \\frac{-2 - 2}{3 - 1} = \\frac{-4}{2} = -2$."
+        },
+
+        // ==================== ECUACIONES (P11) ====================
+        {
+            q: "Resuelve: $x^2 - 5x + 6 = 0$",
+            options: ["$x = 1, x = 6$", "$x = 2, x = 3$", "$x = 0, x = 5$", "Otra respuesta"],
+            correct: 1,
+            explanation: "Factorizando: $(x-2)(x-3) = 0 \\Rightarrow x = 2, x = 3$."
+        },
+
+        // ==================== CONVERSIONES (P12-P13) ====================
+        {
+            q: "Convierte $45°$ a radianes",
+            options: ["$\\frac{\\pi}{2}$ rad", "$\\pi$ rad", "$\\frac{\\pi}{4}$ rad", "Otra respuesta"],
+            correct: 2,
+            explanation: "$45° \\times \\frac{\\pi}{180°} = \\frac{\\pi}{4}$ rad."
+        },
+        {
+            q: "Convierte $32°F$ a Celsius. Usa: $C = \\frac{5}{9}(F - 32)$",
+            options: ["$0°C$", "$32°C$", "$5°C$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$C = \\frac{5}{9}(32 - 32) = \\frac{5}{9}(0) = 0°C$."
+        },
+
+        // ==================== INTERVALOS (P14) ====================
+        {
+            q: "¿Cuál es el intervalo que corresponde a los números mayores que $-3$ y menores o iguales a $2$?",
+            options: ["$(-2, 3]$", "$(-3, 2]$", "$(-3, 2)$", "Otra respuesta"],
+            correct: 1,
+            explanation: "Mayores que $-3$: paréntesis en $-3$. Menores o iguales a $2$: corchete en $2$. Intervalo: $(-3, 2]$."
+        },
+
+        // ==================== PRODUCTOS NOTABLES (P15) ====================
+        {
+            q: "Desarrolla el producto: $(2x - 3)(2x + 3)$",
+            options: ["$4x^2 - 9$", "$4x^2 + 9$", "$2x^2 - 3$", "Otra respuesta"],
+            correct: 0,
+            explanation: "Diferencia de cuadrados: $(2x)^2 - 3^2 = 4x^2 - 9$."
+        },
+
+        // ==================== ECUACIONES LINEALES (P16) ====================
+        {
+            q: "Resuelve la ecuación: $3x - 5 = 10$",
+            options: ["$x = 5$", "$x = 3$", "$x = 2$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$3x - 5 = 10 \\Rightarrow 3x = 15 \\Rightarrow x = 5$."
+        },
+
+        // ==================== NOTACIÓN CIENTÍFICA (P17) ====================
+        {
+            q: "Calcula el producto: $(2 \\times 10^3) \\times (3 \\times 10^2)$",
+            options: ["$6 \\times 10^5$", "$5 \\times 10^5$", "$360 \\times 10$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$2 \\times 3 = 6$, $10^{3+2} = 10^5$. Resultado: $6 \\times 10^5$."
+        },
+
+        // ==================== ECUACIONES CON FRACCIONES (P18) ====================
+        {
+            q: "Resuelve: $\\frac{x}{2} + \\frac{x}{3} = 5$",
+            options: ["$x = 5$", "$x = 6$", "$x = 3$", "Otra respuesta"],
+            correct: 1,
+            explanation: "MCM de 2 y 3 es 6. $\\frac{3x}{6} + \\frac{2x}{6} = 5 \\Rightarrow \\frac{5x}{6} = 5 \\Rightarrow 5x = 30 \\Rightarrow x = 6$."
+        },
+
+        // ==================== PREGUNTAS ADICIONALES (19-30) ====================
+        {
+            q: "Simplifica: $\\sqrt{48}$",
+            options: ["$4\\sqrt{3}$", "$6\\sqrt{2}$", "$8\\sqrt{3}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$\\sqrt{48} = \\sqrt{16 \\times 3} = 4\\sqrt{3}$."
+        },
+        {
+            q: "Convierte $\\frac{3}{5}$ a porcentaje.",
+            options: ["$60\\%$", "$30\\%$", "$50\\%$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$\\frac{3}{5} \\times 100 = 60\\%$."
+        },
+        {
+            q: "Resuelve el sistema: $\\begin{cases} x + y = 5 \\\\ x - y = 1 \\end{cases}$",
+            options: ["$(3, 2)$", "$(2, 3)$", "$(4, 1)$", "Otra respuesta"],
+            correct: 0,
+            explanation: "Sumando: $2x = 6 \\Rightarrow x = 3$. Sustituyendo: $3 + y = 5 \\Rightarrow y = 2$. Solución: $(3, 2)$."
+        },
+        {
+            q: "Simplifica: $\\frac{x^5}{x^2}$",
+            options: ["$x^3$", "$x^7$", "$x^{5/2}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$\\frac{x^5}{x^2} = x^{5-2} = x^3$."
+        },
+        {
+            q: "Convierte $0.75$ a fracción simplificada.",
+            options: ["$\\frac{3}{4}$", "$\\frac{75}{100}$", "$\\frac{15}{20}$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$0.75 = \\frac{75}{100} = \\frac{3}{4}$."
+        },
+        {
+            q: "Calcula la distancia entre $A(1, 1)$ y $B(4, 5)$.",
+            options: ["$5$", "$4$", "$6$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$d = \\sqrt{(4-1)^2 + (5-1)^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5$."
+        },
+        {
+            q: "Resuelve: $2x^2 - 8x = 0$",
+            options: ["$x = 0, x = 4$", "$x = 0, x = -4$", "$x = 2, x = 4$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$2x(x - 4) = 0 \\Rightarrow x = 0, x = 4$."
+        },
+        {
+            q: "Convierte $\\frac{\\pi}{6}$ rad a grados.",
+            options: ["$30°$", "$45°$", "$60°$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$\\frac{\\pi}{6} \\times \\frac{180°}{\\pi} = 30°$."
+        },
+        {
+            q: "Simplifica: $(3x^2y)^3$",
+            options: ["$27x^6y^3$", "$9x^5y^3$", "$27x^5y^3$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$(3x^2y)^3 = 27x^6y^3$."
+        },
+        {
+            q: "Factoriza: $x^2 - 4x + 4$",
+            options: ["$(x-2)^2$", "$(x+2)^2$", "$(x-4)(x+1)$", "Otra respuesta"],
+            correct: 0,
+            explanation: "Trinomio cuadrado perfecto: $x^2 - 4x + 4 = (x-2)^2$."
+        },
+        {
+            q: "Resuelve la desigualdad: $2x + 3 > 7$",
+            options: ["$x > 2$", "$x > 3$", "$x > 4$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$2x + 3 > 7 \\Rightarrow 2x > 4 \\Rightarrow x > 2$."
+        },
+        {
+            q: "Convierte $\\frac{7}{8}$ a decimal.",
+            options: ["$0.875$", "$0.8$", "$0.75$", "Otra respuesta"],
+            correct: 0,
+            explanation: "$\\frac{7}{8} = 7 \\div 8 = 0.875$."
+        }
+    ];
+
+    let currentQ = 0;
+    let correctCount = 0;
+    let errorCount = 0;
+    let studentName = "";
+    let answered = false;
+    const MAX_ERRORS = 10;
+
+    // Establecer fecha de hoy por defecto
+    const fechaInput = document.getElementById('fecha');
+    if (fechaInput) {
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        fechaInput.value = `${año}-${mes}-${dia}`;
+    }
+
+    function startQuiz() {
+        const nameInput = document.getElementById('nombre').value.trim();
+        const dateInput = document.getElementById('fecha').value;
+        if(!nameInput || !dateInput) {
+            alert("Por favor, ingresa tu nombre y la fecha.");
+            return;
+        }
+        studentName = nameInput;
+        document.getElementById('registro').classList.add('hidden');
+        document.getElementById('actividad').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQ];
+        document.getElementById('q-text').innerHTML = `<strong>Pregunta ${currentQ + 1} de ${questions.length}:</strong><br>${q.q}`;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = opt;
+            btn.onclick = () => selectOption(i, btn);
+            container.appendChild(btn);
+        });
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('btn-next').disabled = true;
+        updateStats();
+        
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function selectOption(index, btn) {
+        if(answered) return;
+        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('btn-next').disabled = false;
+        btn.dataset.index = index;
+    }
+
+    function nextQuestion() {
+        if(!answered) {
+            const selected = document.querySelector('.option-btn.selected');
+            if(!selected) {
+                alert("Por favor, selecciona una respuesta antes de continuar.");
+                return;
+            }
+            const idx = parseInt(selected.dataset.index);
+            checkAnswer(idx);
+            answered = true;
+            document.getElementById('btn-next').innerText = (currentQ < questions.length - 1) ? "Siguiente Pregunta" : "Finalizar";
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+        } else {
+            currentQ++;
+            if(currentQ < questions.length) {
+                loadQuestion();
+                document.getElementById('btn-next').innerText = "Siguiente";
+            } else {
+                showResults();
+            }
+        }
+    }
+
+    function checkAnswer(selectedIdx) {
+        const q = questions[currentQ];
+        const isCorrect = selectedIdx === q.correct;
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.option-btn');
+
+        btns.forEach(b => b.classList.add('disabled'));
+        btns[q.correct].classList.add('correct');
+
+        if(isCorrect) {
+            correctCount++;
+            feedback.className = "feedback correct";
+            feedback.innerHTML = "<strong>¡Excelente!</strong> " + q.explanation;
+        } else {
+            errorCount++;
+            btns[selectedIdx].classList.add('incorrect');
+            feedback.className = "feedback incorrect";
+            feedback.innerHTML = "<strong>Incorrecto.</strong> " + q.explanation;
+            
+            if(errorCount >= MAX_ERRORS) {
+                setTimeout(() => {
+                    alert(`Has alcanzado el límite de ${MAX_ERRORS} errores. Te recomendamos repasar: operaciones con fracciones y decimales, notación científica, productos notables, ecuaciones lineales y cuadráticas, conversión de unidades y plano cartesiano.`);
+                    location.reload();
+                }, 1500);
+            }
+        }
+        feedback.style.display = 'block';
+        updateStats();
+    }
+
+    function updateStats() {
+        document.getElementById('correct-count').innerText = correctCount;
+        document.getElementById('error-count').innerText = errorCount;
+        const prog = Math.round((currentQ / questions.length) * 100);
+        document.getElementById('progress-pct').innerText = prog + "%";
+        document.getElementById('progress-bar').style.width = prog + "%";
+    }
+
+    function showResults() {
+        document.getElementById('actividad').classList.add('hidden');
+        document.getElementById('resultados').classList.remove('hidden');
+        document.getElementById('student-name-display').innerText = studentName;
+        const score = Math.round((correctCount / questions.length) * 100);
+        document.getElementById('final-score').innerText = score + "%";
+        
+        let msg = score >= 80 ? 
+            "¡Excelente trabajo! Dominas los conceptos de aritmética, álgebra, geometría analítica y conversiones de unidades." : 
+            "Buen esfuerzo. Te sugerimos repasar: operaciones con fracciones y decimales, notación científica, productos notables, ecuaciones lineales y cuadráticas, conversión de grados a radianes y Fahrenheit a Celsius, y el plano cartesiano.";
+        document.getElementById('personal-message').innerText = msg;
+    }
+</script>
+</body>
+</html>
