@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad de Reforzamiento: Precálculo - Álgebra, Ecuaciones y Plano Cartesiano</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e67e22;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --gray: #95a5a6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f7f6; color: #333; line-height: 1.6; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: var(--primary); color: #fff; padding: 25px; text-align: center; }
+        header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        header h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; }
+        section { padding: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1rem; margin-bottom: 10px; box-sizing: border-box; }
+        .btn { display: inline-block; background: var(--secondary); color: #fff; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background 0.3s; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #d35400; }
+        .btn:disabled { background: var(--gray); cursor: not-allowed; }
+        .btn-next { background: var(--primary); }
+        .btn-next:hover { background: #1a252f; }
+        
+        .stats-bar { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; flex-wrap: wrap; gap: 10px; }
+        .stat-item span { color: var(--secondary); }
+        .progress-container { height: 8px; background: #e0e0e0; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.4s ease; }
+        
+        .question-box { margin-bottom: 20px; }
+        .question-text { font-size: 1.1rem; margin-bottom: 20px; font-weight: 500; background: #fdfefe; padding: 15px; border-radius: 8px; border-left: 5px solid var(--secondary); }
+        .options { display: grid; gap: 8px; }
+        .option-btn { padding: 12px; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 1rem; width: 100%; }
+        .option-btn:hover:not(.disabled) { border-color: var(--secondary); background: #fef5e7; }
+        .option-btn.selected { border-color: var(--secondary); background: #fdebd0; font-weight: 600; }
+        .option-btn.correct { border-color: var(--success); background: #d5f5e3; }
+        .option-btn.incorrect { border-color: var(--danger); background: #fadbd8; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+        
+        .feedback { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; }
+        .feedback.correct { background: #d5f5e3; color: #145a32; border: 1px solid #27ae60; }
+        .feedback.incorrect { background: #fadbd8; color: #7b241c; border: 1px solid #e74c3c; }
+        
+        .results-box { text-align: center; }
+        .score-circle { width: 120px; height: 120px; background: var(--secondary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; margin: 20px auto; }
+        .hidden { display: none !important; }
+        
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            section { padding: 15px; }
+            .option-btn { font-size: 0.95rem; padding: 10px; }
+            .stats-bar { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Actividad de Reforzamiento</h1>
+        <h2>Precálculo | Álgebra, Ecuaciones y Plano Cartesiano</h2>
+    </header>
+
+    <section id="registro">
+        <div class="form-group">
+            <label for="nombre">Nombre del Estudiante</label>
+            <input type="text" id="nombre" placeholder="Tu nombre completo">
+            <label for="fecha">Fecha de Realización</label>
+            <input type="date" id="fecha">
+        </div>
+        <button class="btn" onclick="startQuiz()">Iniciar Evaluación</button>
+    </section>
+
+    <section id="actividad" class="hidden">
+        <div class="stats-bar">
+            <div class="stat-item">✅ <span id="correct-count">0</span></div>
+            <div class="stat-item">❌ <span id="error-count">0</span>/10</div>
+            <div class="stat-item">📊 <span id="progress-pct">0%</span></div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div id="question-container">
+            <div class="question-box">
+                <p class="question-text" id="q-text"></p>
+                <div class="options" id="options-container"></div>
+                <div id="feedback" class="feedback"></div>
+            </div>
+            <button class="btn btn-next" id="btn-next" onclick="nextQuestion()" disabled>Siguiente</button>
+        </div>
+    </section>
+
+    <section id="resultados" class="hidden">
+        <div class="results-box">
+            <h2>Resultado para <span id="student-name-display"></span></h2>
+            <div class="score-circle" id="final-score">0%</div>
+            <div id="personal-message" style="margin: 20px 0; font-size: 1.1rem;"></div>
+            <button class="btn" onclick="location.reload()">Reiniciar Actividad</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    // 30 reactivos basados en el Segundo Examen Parcial de Precálculo
+    const questions = [
+        // ==================== SECCIÓN 1: Álgebra y Factorización (P1-P10) ====================
+        {
+            q: "¿Cuál es el resultado de simplificar la expresión algebraica: $3x + 5x - 2x$?",
+            options: ["$6x$", "$10x$", "$8x$", "$5x$"],
+            correct: 0,
+            explanation: "Se agrupan los términos semejantes sumando/restando sus coeficientes: $(3 + 5 - 2)x = 6x$."
+        },
+        {
+            q: "¿Cuál es el producto notable de $(a + b)^2$?",
+            options: ["$a^2 + b^2$", "$a^2 + 2ab + b^2$", "$a^2 - 2ab + b^2$", "$2a + 2b$"],
+            correct: 1,
+            explanation: "Por definición del binomio al cuadrado: $(a+b)^2 = a^2 + 2(a)(b) + b^2 = a^2 + 2ab + b^2$."
+        },
+        {
+            q: "Al multiplicar los monomios $(3x^2)(4x^3)$ ¿cuál es el resultado?",
+            options: ["$7x^5$", "$12x^6$", "$12x^5$", "$7x^6$"],
+            correct: 2,
+            explanation: "Se multiplican coeficientes $(3 \\times 4 = 12)$ y se suman exponentes de la misma base $(x^{2+3} = x^5)$, resultando en $12x^5$."
+        },
+        {
+            q: "¿Cómo se llama el lenguaje que utiliza letras para representar números?",
+            options: ["Lenguaje aritmético", "Lenguaje algebraico", "Lenguaje geométrico", "Lenguaje numérico"],
+            correct: 1,
+            explanation: "El lenguaje que utiliza letras (variables) para representar números desconocidos o generales se denomina lenguaje algebraico."
+        },
+        {
+            q: "¿Cuál es el resultado de dividir $15x^4$ entre $3x^2$?",
+            options: ["$5x^2$", "$5x^3$", "$12x^2$", "$18x^2$"],
+            correct: 0,
+            explanation: "Se dividen coeficientes $(15 \\div 3 = 5)$ y se restan exponentes $(x^{4-2} = x^2)$, resultando en $5x^2$."
+        },
+        {
+            q: "¿Cuál es la factorización correcta de $x^2 - 9$?",
+            options: ["$(x - 3)(x - 3)$", "$(x + 3)(x + 3)$", "$(x + 3)(x - 3)$", "$(x - 9)(x + 1)$"],
+            correct: 2,
+            explanation: "Es una diferencia de cuadrados: $x^2 - 3^2$. Se factoriza como $(x + 3)(x - 3)$."
+        },
+        {
+            q: "Al factorizar $6x + 12$, ¿cuál es el factor común?",
+            options: ["$2$", "$3$", "$6$", "$12$"],
+            correct: 2,
+            explanation: "El máximo común divisor de 6 y 12 es 6. Al extraerlo: $6(x + 2)$. El factor común es $6$."
+        },
+        {
+            q: "¿Cuál es la factorización de $x^2 + 6x + 9$?",
+            options: ["$(x + 3)^2$", "$(x - 3)^2$", "$(x + 6)(x + 1)$", "$(x + 9)(x + 1)$"],
+            correct: 0,
+            explanation: "Es un trinomio cuadrado perfecto: $x^2 + 2(3)(x) + 3^2$. Se factoriza como el binomio al cuadrado $(x + 3)^2$."
+        },
+        {
+            q: "La expresión $a^3 - b^3$ corresponde a:",
+            options: ["Suma de cubos", "Diferencia de cuadrados", "Diferencia de cubos", "Trinomio cuadrado perfecto"],
+            correct: 2,
+            explanation: "La expresión $a^3 - b^3$ representa la resta de dos cubos perfectos, conocida como diferencia de cubos."
+        },
+        {
+            q: "¿Cuál es la factorización de $x^2 + 5x + 6$?",
+            options: ["$(x + 2)(x + 3)$", "$(x + 1)(x + 6)$", "$(x - 2)(x - 3)$", "$(x + 5)(x + 1)$"],
+            correct: 0,
+            explanation: "Se buscan dos números que multiplicados den $6$ y sumados den $5$. Son $2$ y $3$. Por lo tanto, $(x + 2)(x + 3)$."
+        },
+
+        // ==================== SECCIÓN 2: Ecuaciones y Desigualdades (P11-P16) ====================
+        {
+            q: "Resuelve la ecuación lineal $2x + 5 = 13$",
+            options: ["$x = 3$", "$x = 4$", "$x = 5$", "$x = 6$"],
+            correct: 1,
+            explanation: "$2x + 5 = 13 \\Rightarrow 2x = 13 - 5 \\Rightarrow 2x = 8 \\Rightarrow x = \\frac{8}{2} = 4$."
+        },
+        {
+            q: "Al resolver $3x - 7 = 2x + 5$, ¿cuál es el valor de $x$?",
+            options: ["$x = 10$", "$x = 12$", "$x = 8$", "$x = 15$"],
+            correct: 1,
+            explanation: "$3x - 7 = 2x + 5 \\Rightarrow 3x - 2x = 5 + 7 \\Rightarrow x = 12$."
+        },
+        {
+            q: "¿Cuál es el inverso aditivo de $-5$?",
+            options: ["$-5$", "$0$", "$5$", "$1/5$"],
+            correct: 2,
+            explanation: "El inverso aditivo de un número $a$ es $-a$, tal que $a + (-a) = 0$. El inverso de $-5$ es $5$."
+        },
+        {
+            q: "¿Cuál es el inverso multiplicativo de $4$?",
+            options: ["$-4$", "$0$", "$4$", "$1/4$"],
+            correct: 3,
+            explanation: "El inverso multiplicativo de un número $a$ es $1/a$, tal que $a \\cdot (1/a) = 1$. El inverso de $4$ es $1/4$."
+        },
+        {
+            q: "Al resolver la ecuación $\\frac{x}{3} + 2 = 6$, ¿cuál es el valor de $x$?",
+            options: ["$x = 9$", "$x = 12$", "$x = 15$", "$x = 18$"],
+            correct: 1,
+            explanation: "$\\frac{x}{3} + 2 = 6 \\Rightarrow \\frac{x}{3} = 6 - 2 \\Rightarrow \\frac{x}{3} = 4 \\Rightarrow x = 4 \\times 3 = 12$."
+        },
+        {
+            q: "Resuelve la desigualdad: $2x - 4 < 8$",
+            options: ["$x < 4$", "$x < 6$", "$x < 8$", "$x < 12$"],
+            correct: 1,
+            explanation: "$2x - 4 < 8 \\Rightarrow 2x < 8 + 4 \\Rightarrow 2x < 12 \\Rightarrow x < \\frac{12}{2} \\Rightarrow x < 6$."
+        },
+
+        // ==================== SECCIÓN 3: Sistema de Ecuaciones (P17) ====================
+        {
+            q: "¿Cuál es la solución del sistema de ecuaciones lineales $\\begin{cases} 4x - y = 11 \\\\ 2x + y = 7 \\end{cases}$?",
+            options: ["$(x,y) = (2,3)$", "$(x,y) = (4,-1)$", "$(x,y) = (3,1)$", "$(x,y) = (1,5)$"],
+            correct: 2,
+            explanation: "Sumando las ecuaciones: $6x = 18 \\Rightarrow x = 3$. Sustituyendo en $2x+y=7$: $6+y=7 \\Rightarrow y=1$. Solución: $(3,1)$."
+        },
+
+        // ==================== SECCIÓN 4: Plano Cartesiano (P18-P20) ====================
+        {
+            q: "¿Cuál es la distancia entre los puntos $A(0, 0)$ y $B(3, 4)$?",
+            options: ["$5$", "$6$", "$7$", "$12$"],
+            correct: 0,
+            explanation: "Fórmula de distancia: $d = \\sqrt{(3-0)^2 + (4-0)^2} = \\sqrt{9 + 16} = \\sqrt{25} = 5$."
+        },
+        {
+            q: "¿Qué tipo de función representa una línea vertical en el plano cartesiano?",
+            options: ["Función lineal", "No es una función", "Función cuadrática", "Función exponencial"],
+            correct: 1,
+            explanation: "Una línea vertical (ej. $x = c$) falla la 'prueba de la recta vertical' porque un solo valor de $x$ se asigna a infinitos valores de $y$. Por definición, no es una función."
+        },
+        {
+            q: "¿Cuál es la pendiente de la recta que pasa por los puntos $(1, 2)$ y $(3, 6)$?",
+            options: ["$1$", "$2$", "$3$", "$4$"],
+            correct: 1,
+            explanation: "Fórmula de pendiente $m = \\frac{y_2 - y_1}{x_2 - x_1} = \\frac{6 - 2}{3 - 1} = \\frac{4}{2} = 2$."
+        },
+        {
+            q: "La gráfica de $y = x^2$ corresponde a:",
+            options: ["Una recta", "Una parábola", "Una circunferencia", "Una hipérbola"],
+            correct: 1,
+            explanation: "La ecuación $y = x^2$ es una función cuadrática de la forma $y = ax^2 + bx + c$ (con $a=1, b=0, c=0$), cuya gráfica característica es una parábola."
+        },
+
+        // ==================== PREGUNTAS ADICIONALES (21-30) ====================
+        {
+            q: "Simplifique: $(2x + 3y)^2$",
+            options: ["$4x^2 + 12xy + 9y^2$", "$4x^2 + 6xy + 9y^2$", "$2x^2 + 6xy + 3y^2$", "$4x^2 + 9y^2$"],
+            correct: 0,
+            explanation: "Binomio al cuadrado: $(2x)^2 + 2(2x)(3y) + (3y)^2 = 4x^2 + 12xy + 9y^2$."
+        },
+        {
+            q: "Factorice: $x^2 - 16$",
+            options: ["$(x - 4)(x - 4)$", "$(x + 4)(x + 4)$", "$(x + 4)(x - 4)$", "$(x - 16)(x + 1)$"],
+            correct: 2,
+            explanation: "Diferencia de cuadrados: $x^2 - 4^2 = (x + 4)(x - 4)$."
+        },
+        {
+            q: "Resuelva: $3x + 7 = 22$",
+            options: ["$x = 3$", "$x = 5$", "$x = 7$", "$x = 9$"],
+            correct: 1,
+            explanation: "$3x + 7 = 22 \\Rightarrow 3x = 22 - 7 \\Rightarrow 3x = 15 \\Rightarrow x = 5$."
+        },
+        {
+            q: "Simplifique: $\\frac{12x^5}{4x^2}$",
+            options: ["$3x^3$", "$3x^2$", "$8x^3$", "$3x^7$"],
+            correct: 0,
+            explanation: "$\\frac{12}{4} = 3$ y $x^{5-2} = x^3$, resultando en $3x^3$."
+        },
+        {
+            q: "¿Cuál es el inverso aditivo de $7$?",
+            options: ["$7$", "$-7$", "$1/7$", "$0$"],
+            correct: 1,
+            explanation: "El inverso aditivo de $7$ es $-7$, ya que $7 + (-7) = 0$."
+        },
+        {
+            q: "Factorice: $x^2 - 8x + 16$",
+            options: ["$(x - 4)^2$", "$(x + 4)^2$", "$(x - 8)(x + 2)$", "$(x - 2)(x - 8)$"],
+            correct: 0,
+            explanation: "Trinomio cuadrado perfecto: $x^2 - 2(4)(x) + 4^2 = (x - 4)^2$."
+        },
+        {
+            q: "Resuelva la desigualdad: $5x - 3 > 17$",
+            options: ["$x > 4$", "$x > 3$", "$x > 5$", "$x > 7$"],
+            correct: 0,
+            explanation: "$5x - 3 > 17 \\Rightarrow 5x > 20 \\Rightarrow x > 4$."
+        },
+        {
+            q: "¿Cuál es la pendiente de la recta que pasa por $(0, 0)$ y $(2, 6)$?",
+            options: ["$2$", "$3$", "$4$", "$6$"],
+            correct: 1,
+            explanation: "$m = \\frac{6 - 0}{2 - 0} = \\frac{6}{2} = 3$."
+        },
+        {
+            q: "La gráfica de $y = -x^2$ es una parábola que abre hacia:",
+            options: ["Arriba", "Abajo", "Derecha", "Izquierda"],
+            correct: 1,
+            explanation: "La función $y = -x^2$ tiene coeficiente principal negativo, por lo que la parábola abre hacia abajo."
+        },
+        {
+            q: "Simplifique: $(3x^2y)^2$",
+            options: ["$9x^4y^2$", "$6x^4y^2$", "$9x^2y^2$", "$3x^4y^2$"],
+            correct: 0,
+            explanation: "$(3x^2y)^2 = 3^2 \\cdot x^{2\\cdot2} \\cdot y^2 = 9x^4y^2$."
+        }
+    ];
+
+    let currentQ = 0;
+    let correctCount = 0;
+    let errorCount = 0;
+    let studentName = "";
+    let answered = false;
+    const MAX_ERRORS = 10;
+
+    // Establecer fecha de hoy por defecto
+    const fechaInput = document.getElementById('fecha');
+    if (fechaInput) {
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        fechaInput.value = `${año}-${mes}-${dia}`;
+    }
+
+    function startQuiz() {
+        const nameInput = document.getElementById('nombre').value.trim();
+        const dateInput = document.getElementById('fecha').value;
+        if(!nameInput || !dateInput) {
+            alert("Por favor, ingresa tu nombre y la fecha.");
+            return;
+        }
+        studentName = nameInput;
+        document.getElementById('registro').classList.add('hidden');
+        document.getElementById('actividad').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQ];
+        document.getElementById('q-text').innerHTML = `<strong>Pregunta ${currentQ + 1} de ${questions.length}:</strong><br>${q.q}`;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = opt;
+            btn.onclick = () => selectOption(i, btn);
+            container.appendChild(btn);
+        });
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('btn-next').disabled = true;
+        updateStats();
+        
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function selectOption(index, btn) {
+        if(answered) return;
+        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('btn-next').disabled = false;
+        btn.dataset.index = index;
+    }
+
+    function nextQuestion() {
+        if(!answered) {
+            const selected = document.querySelector('.option-btn.selected');
+            if(!selected) {
+                alert("Por favor, selecciona una respuesta antes de continuar.");
+                return;
+            }
+            const idx = parseInt(selected.dataset.index);
+            checkAnswer(idx);
+            answered = true;
+            document.getElementById('btn-next').innerText = (currentQ < questions.length - 1) ? "Siguiente Pregunta" : "Finalizar";
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+        } else {
+            currentQ++;
+            if(currentQ < questions.length) {
+                loadQuestion();
+                document.getElementById('btn-next').innerText = "Siguiente";
+            } else {
+                showResults();
+            }
+        }
+    }
+
+    function checkAnswer(selectedIdx) {
+        const q = questions[currentQ];
+        const isCorrect = selectedIdx === q.correct;
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.option-btn');
+
+        btns.forEach(b => b.classList.add('disabled'));
+        btns[q.correct].classList.add('correct');
+
+        if(isCorrect) {
+            correctCount++;
+            feedback.className = "feedback correct";
+            feedback.innerHTML = "<strong>¡Excelente!</strong> " + q.explanation;
+        } else {
+            errorCount++;
+            btns[selectedIdx].classList.add('incorrect');
+            feedback.className = "feedback incorrect";
+            feedback.innerHTML = "<strong>Incorrecto.</strong> " + q.explanation;
+            
+            if(errorCount >= MAX_ERRORS) {
+                setTimeout(() => {
+                    alert(`Has alcanzado el límite de ${MAX_ERRORS} errores. Te recomendamos repasar: productos notables, factorización, resolución de ecuaciones lineales y sistemas de ecuaciones, y conceptos del plano cartesiano.`);
+                    location.reload();
+                }, 1500);
+            }
+        }
+        feedback.style.display = 'block';
+        updateStats();
+    }
+
+    function updateStats() {
+        document.getElementById('correct-count').innerText = correctCount;
+        document.getElementById('error-count').innerText = errorCount;
+        const prog = Math.round((currentQ / questions.length) * 100);
+        document.getElementById('progress-pct').innerText = prog + "%";
+        document.getElementById('progress-bar').style.width = prog + "%";
+    }
+
+    function showResults() {
+        document.getElementById('actividad').classList.add('hidden');
+        document.getElementById('resultados').classList.remove('hidden');
+        document.getElementById('student-name-display').innerText = studentName;
+        const score = Math.round((correctCount / questions.length) * 100);
+        document.getElementById('final-score').innerText = score + "%";
+        
+        let msg = score >= 80 ? 
+            "¡Excelente trabajo! Dominas los conceptos de álgebra: productos notables, factorización, ecuaciones lineales, sistemas de ecuaciones y geometría analítica básica." : 
+            "Buen esfuerzo. Te sugerimos repasar: productos notables (binomio al cuadrado, diferencia de cuadrados), factorización de trinomios, resolución de ecuaciones lineales y sistemas de ecuaciones por métodos de suma/resta, y la fórmula de distancia entre puntos en el plano.";
+        document.getElementById('personal-message').innerText = msg;
+    }
+</script>
+</body>
+</html>
