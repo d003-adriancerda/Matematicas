@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Actividad de Reforzamiento: Precálculo - Matemáticas Básicas y Álgebra</title>
+    
+    <script>
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --secondary: #e67e22;
+            --success: #27ae60;
+            --danger: #e74c3c;
+            --gray: #95a5a6;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        body { background: #f4f7f6; color: #333; line-height: 1.6; padding: 20px; }
+        .container { max-width: 850px; margin: 0 auto; background: #fff; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); overflow: hidden; }
+        header { background: var(--primary); color: #fff; padding: 25px; text-align: center; }
+        header h1 { font-size: 1.8rem; margin-bottom: 5px; }
+        header h2 { font-size: 1.1rem; font-weight: 400; opacity: 0.9; }
+        section { padding: 25px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 10px; border: 2px solid #ddd; border-radius: 6px; font-size: 1rem; margin-bottom: 10px; box-sizing: border-box; }
+        .btn { display: inline-block; background: var(--secondary); color: #fff; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: background 0.3s; width: 100%; margin-top: 10px; }
+        .btn:hover { background: #d35400; }
+        .btn:disabled { background: var(--gray); cursor: not-allowed; }
+        .btn-next { background: var(--primary); }
+        .btn-next:hover { background: #1a252f; }
+        
+        .stats-bar { display: flex; justify-content: space-between; background: #f8f9fa; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; font-weight: 600; flex-wrap: wrap; gap: 10px; }
+        .stat-item span { color: var(--secondary); }
+        .progress-container { height: 8px; background: #e0e0e0; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        .progress-bar { height: 100%; background: var(--success); width: 0%; transition: width 0.4s ease; }
+        
+        .question-box { margin-bottom: 20px; }
+        .question-text { font-size: 1.1rem; margin-bottom: 20px; font-weight: 500; background: #fdfefe; padding: 15px; border-radius: 8px; border-left: 5px solid var(--secondary); }
+        .options { display: grid; gap: 8px; }
+        .option-btn { padding: 12px; background: #fff; border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s; font-size: 1rem; width: 100%; }
+        .option-btn:hover:not(.disabled) { border-color: var(--secondary); background: #fef5e7; }
+        .option-btn.selected { border-color: var(--secondary); background: #fdebd0; font-weight: 600; }
+        .option-btn.correct { border-color: var(--success); background: #d5f5e3; }
+        .option-btn.incorrect { border-color: var(--danger); background: #fadbd8; }
+        .option-btn.disabled { pointer-events: none; opacity: 0.7; }
+        
+        .feedback { margin-top: 15px; padding: 12px; border-radius: 6px; display: none; }
+        .feedback.correct { background: #d5f5e3; color: #145a32; border: 1px solid #27ae60; }
+        .feedback.incorrect { background: #fadbd8; color: #7b241c; border: 1px solid #e74c3c; }
+        
+        .results-box { text-align: center; }
+        .score-circle { width: 120px; height: 120px; background: var(--secondary); color: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 700; margin: 20px auto; }
+        .hidden { display: none !important; }
+        
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            section { padding: 15px; }
+            .option-btn { font-size: 0.95rem; padding: 10px; }
+            .stats-bar { font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Actividad de Reforzamiento</h1>
+        <h2>Precálculo | Matemáticas Básicas y Álgebra</h2>
+    </header>
+
+    <section id="registro">
+        <div class="form-group">
+            <label for="nombre">Nombre del Estudiante</label>
+            <input type="text" id="nombre" placeholder="Tu nombre completo">
+            <label for="fecha">Fecha de Realización</label>
+            <input type="date" id="fecha">
+        </div>
+        <button class="btn" onclick="startQuiz()">Iniciar Evaluación</button>
+    </section>
+
+    <section id="actividad" class="hidden">
+        <div class="stats-bar">
+            <div class="stat-item">✅ <span id="correct-count">0</span></div>
+            <div class="stat-item">❌ <span id="error-count">0</span>/10</div>
+            <div class="stat-item">📊 <span id="progress-pct">0%</span></div>
+        </div>
+        <div class="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div id="question-container">
+            <div class="question-box">
+                <p class="question-text" id="q-text"></p>
+                <div class="options" id="options-container"></div>
+                <div id="feedback" class="feedback"></div>
+            </div>
+            <button class="btn btn-next" id="btn-next" onclick="nextQuestion()" disabled>Siguiente</button>
+        </div>
+    </section>
+
+    <section id="resultados" class="hidden">
+        <div class="results-box">
+            <h2>Resultado para <span id="student-name-display"></span></h2>
+            <div class="score-circle" id="final-score">0%</div>
+            <div id="personal-message" style="margin: 20px 0; font-size: 1.1rem;"></div>
+            <button class="btn" onclick="location.reload()">Reiniciar Actividad</button>
+        </div>
+    </section>
+</div>
+
+<script>
+    // 30 reactivos basados en el Primer Examen Parcial de Precálculo
+    const questions = [
+        // ==================== CONCEPTUALES (P1-P5) ====================
+        {
+            q: "¿Por qué es necesario obtener un denominador común para sumar o restar fracciones?",
+            options: [
+                "Para multiplicar los numeradores directamente.",
+                "Para poder operar los numeradores usando la propiedad $n/n=1$ (Principio del camello).",
+                "Porque así se eliminan las variables.",
+                "No es necesario, se pueden sumar directamente."
+            ],
+            correct: 1,
+            explanation: "Se requiere un denominador común para que las partes sean del mismo tamaño, permitiendo sumar/restar numeradores. Se logra multiplicando por $n/n=1$ (Principio del camello)."
+        },
+        {
+            q: "¿Qué establece el 'Principio del Camello' ($n/n=1$)?",
+            options: [
+                "Que cualquier número dividido por cero es 1.",
+                "Que el 1 se puede representar de infinitas formas (ej. $2/2$, $3/3$) para igualar denominadores.",
+                "Que el numerador siempre debe ser mayor que el denominador.",
+                "Que las fracciones impropias no se pueden simplificar."
+            ],
+            correct: 1,
+            explanation: "El principio establece que $n/n = 1$. Al multiplicar una fracción por $n/n$, su valor no cambia, pero su representación sí, lo que permite igualar denominadores."
+        },
+        {
+            q: "¿Cuál es la ventaja de usar la estructura 'X de cada Y' en estadística?",
+            options: [
+                "Hace que los datos parezcan más complejos.",
+                "Simplifica el dato para que sea más comprensible (ej. '8 de cada 10' = 80%).",
+                "Permite eliminar los decimales en todas las operaciones.",
+                "Convierte automáticamente las fracciones en potencias."
+            ],
+            correct: 1,
+            explanation: "La estructura 'X de cada Y' humaniza y simplifica la estadística. Ejemplo: '8 de cada 10' es inmediatamente comprensible como $8/10 = 80\\%$."
+        },
+        {
+            q: "¿Cuál es el procedimiento para convertir una potencia negativa a positiva?",
+            options: [
+                "Se cambia el signo de la base.",
+                "Se invierte la base como fracción: $a^{-n} = \\frac{1}{a^n}$.",
+                "Se multiplica el exponente por $-1$ y se mantiene la base.",
+                "Se elimina el exponente y se deja solo la base."
+            ],
+            correct: 1,
+            explanation: "Por definición de potencias negativas, $a^{-n} = \\frac{1}{a^n}$. Se invierte la base para volver el exponente positivo."
+        },
+        {
+            q: "¿Qué representan las variables y en qué se diferencian de las constantes?",
+            options: [
+                "Las variables son fijas y las constantes cambian.",
+                "Las variables son valores desconocidos que pueden cambiar (letras); las constantes son valores fijos y conocidos.",
+                "Ambas representan lo mismo, solo cambia la notación.",
+                "Las variables son siempre números negativos."
+            ],
+            correct: 1,
+            explanation: "Una variable (ej. $x, y$) representa un valor desconocido o que puede variar. Una constante (ej. $7, -3$) es un valor numérico fijo y conocido."
+        },
+
+        // ==================== OPERACIONES CON FRACCIONES (P6-P8) ====================
+        {
+            q: "Calcule: $\\frac{3}{4} + \\frac{2}{5} - \\frac{1}{10}$",
+            options: [
+                "$1\\frac{1}{20}$",
+                "$1$",
+                "$\\frac{12}{90}$",
+                "$\\frac{22}{30}$"
+            ],
+            correct: 0,
+            explanation: "MCM de 4, 5, 10 es 20. $\\frac{3(5)}{20} + \\frac{2(4)}{20} - \\frac{1(2)}{20} = \\frac{15 + 8 - 2}{20} = \\frac{21}{20} = 1\\frac{1}{20}$."
+        },
+        {
+            q: "Realice la división: $\\frac{5}{6} \\div \\frac{2}{3}$",
+            options: [
+                "$\\frac{12}{1152}$",
+                "$\\frac{15}{12}$",
+                "$\\frac{11}{108}$",
+                "$1\\frac{1}{4}$"
+            ],
+            correct: 3,
+            explanation: "División de fracciones: $\\frac{5}{6} \\times \\frac{3}{2} = \\frac{15}{12}$. Simplificando entre 3: $\\frac{5}{4} = 1\\frac{1}{4}$."
+        },
+        {
+            q: "Convierta la fracción $\\frac{5}{8}$ a decimal.",
+            options: [
+                "$0.625$",
+                "$0.8$",
+                "$0.5$",
+                "$0.6$"
+            ],
+            correct: 0,
+            explanation: "$\\frac{5}{8} = 5 \\div 8 = 0.625$."
+        },
+
+        // ==================== PORCENTAJES (P9-P10) ====================
+        {
+            q: "Calcule el 20% de 150.",
+            options: [
+                "$45$",
+                "$15$",
+                "$30$",
+                "$20$"
+            ],
+            correct: 2,
+            explanation: "$150 \\times 0.20 = 30$."
+        },
+        {
+            q: "Un producto cuesta \\$80 y tiene un descuento del 25%. ¿Cuál es el precio final?",
+            options: [
+                "$20$",
+                "$60$",
+                "$55$",
+                "$75$"
+            ],
+            correct: 1,
+            explanation: "Descuento = $80 \\times 0.25 = 20$. Precio final = $80 - 20 = 60$."
+        },
+
+        // ==================== LEYES DE EXPONENTES (P11-P13) ====================
+        {
+            q: "Simplifique usando leyes de exponentes: $2^3 \\times 2^4$",
+            options: [
+                "$256$",
+                "$14$",
+                "$64$",
+                "$128$"
+            ],
+            correct: 3,
+            explanation: "Producto de igual base, se suman exponentes: $2^{3+4} = 2^7 = 128$."
+        },
+        {
+            q: "Simplifique la expresión: $\\frac{5^5}{5}$",
+            options: [
+                "$125$",
+                "$625$",
+                "$25$",
+                "$3125$"
+            ],
+            correct: 1,
+            explanation: "Cociente de igual base, se restan exponentes: $\\frac{5^5}{5^1} = 5^{5-1} = 5^4 = 625$."
+        },
+        {
+            q: "Encuentre el valor decimal de: $2^{-3}$",
+            options: [
+                "$-8$",
+                "$0.125$",
+                "$0.25$",
+                "$8$"
+            ],
+            correct: 1,
+            explanation: "$2^{-3} = \\frac{1}{2^3} = \\frac{1}{8} = 0.125$."
+        },
+
+        // ==================== RADICALES Y EXPONENTES FRACCIONARIOS (P14-P16) ====================
+        {
+            q: "Simplifique el radical: $\\sqrt{50}$",
+            options: [
+                "$10\\sqrt{5}$",
+                "$2\\sqrt{5}$",
+                "$25\\sqrt{2}$",
+                "$5\\sqrt{2}$"
+            ],
+            correct: 3,
+            explanation: "$\\sqrt{50} = \\sqrt{25 \\times 2} = \\sqrt{25} \\times \\sqrt{2} = 5\\sqrt{2}$."
+        },
+        {
+            q: "Simplifique: $x^{1/2} \\times x^{3/2}$",
+            options: [
+                "$x^{3/4}$",
+                "$x^2$",
+                "$x$",
+                "$x^{4/4}$"
+            ],
+            correct: 1,
+            explanation: "Igual base, se suman exponentes: $x^{1/2 + 3/2} = x^{4/2} = x^2$."
+        },
+        {
+            q: "Simplifique la potencia de una potencia: $(x^{2/3})^{3/4}$",
+            options: [
+                "$x^{9/8}$",
+                "$x^{5/7}$",
+                "$x$",
+                "$\\sqrt{x}$"
+            ],
+            correct: 3,
+            explanation: "Potencia de potencia, se multiplican exponentes: $x^{(2/3) \\times (3/4)} = x^{6/12} = x^{1/2} = \\sqrt{x}$."
+        },
+
+        // ==================== ÁLGEBRA: TRADUCCIÓN Y COMPONENTES (P17-P19) ====================
+        {
+            q: "Traduzca al algebraico: 'El triple de un número menos dos terceras partes de dicho número'.",
+            options: [
+                "$3(x - \\frac{2}{3})$",
+                "$3(x - 2)$",
+                "$3x - \\frac{3}{2}x$",
+                "$3x - \\frac{2}{3}x$"
+            ],
+            correct: 3,
+            explanation: "'Triple de un número' = $3x$. 'Menos dos terceras partes de dicho número' = $-\\frac{2}{3}x$. Resultado: $3x - \\frac{2}{3}x$."
+        },
+        {
+            q: "En la expresión $4x^2y - 3xy + 7$, ¿cuál es el valor de la constante?",
+            options: [
+                "$4$",
+                "$7$",
+                "$-3$",
+                "$2$"
+            ],
+            correct: 1,
+            explanation: "En $4x^2y - 3xy + 7$, los términos con letras son variables. El término sin variable es la constante: $7$."
+        },
+        {
+            q: "Traduzca al algebraico: 'Un número aumentado el 50 por ciento'.",
+            options: [
+                "$x + \\frac{1}{2}$",
+                "$x + 50$",
+                "$x + 50x$",
+                "$x + \\frac{1}{2}x$"
+            ],
+            correct: 3,
+            explanation: "'Un número' = $x$. 'Aumentado el 50%' = $+ 50\\% \\text{ de } x = +\\frac{50}{100}x = +\\frac{1}{2}x$. Resultado: $x + \\frac{1}{2}x$."
+        },
+
+        // ==================== RADICAL A POTENCIA (P20) ====================
+        {
+            q: "Convierta el radical $\\sqrt[3]{8}$ a potencia y simplifique.",
+            options: [
+                "$1$",
+                "$3$",
+                "$2$",
+                "$4$"
+            ],
+            correct: 2,
+            explanation: "$\\sqrt[3]{8} = 8^{1/3}$. Como $8 = 2^3$, entonces $(2^3)^{1/3} = 2^{3/3} = 2^1 = 2$."
+        },
+
+        // ==================== PREGUNTAS ADICIONALES (21-30) ====================
+        // Basadas en el temario de Precálculo
+        {
+            q: "Simplifique: $\\sqrt{72}$",
+            options: [
+                "$6\\sqrt{2}$",
+                "$8\\sqrt{3}$",
+                "$9\\sqrt{8}$",
+                "$12\\sqrt{6}$"
+            ],
+            correct: 0,
+            explanation: "$\\sqrt{72} = \\sqrt{36 \\times 2} = 6\\sqrt{2}$."
+        },
+        {
+            q: "Calcule: $\\frac{2}{3} \\div \\frac{4}{9}$",
+            options: [
+                "$\\frac{8}{27}$",
+                "$\\frac{3}{2}$",
+                "$\\frac{1}{2}$",
+                "$\\frac{9}{6}$"
+            ],
+            correct: 1,
+            explanation: "$\\frac{2}{3} \\times \\frac{9}{4} = \\frac{18}{12} = \\frac{3}{2}$."
+        },
+        {
+            q: "Simplifique: $(3x^2y)^3$",
+            options: [
+                "$27x^6y^3$",
+                "$9x^5y^3$",
+                "$27x^5y^3$",
+                "$9x^6y^3$"
+            ],
+            correct: 0,
+            explanation: "$(3x^2y)^3 = 3^3 \\cdot x^{2\\cdot3} \\cdot y^3 = 27x^6y^3$."
+        },
+        {
+            q: "¿Cuál es el resultado de $(-2)^4$?",
+            options: [
+                "$-16$",
+                "$16$",
+                "$-8$",
+                "$8$"
+            ],
+            correct: 1,
+            explanation: "$(-2)^4 = (-2) \\times (-2) \\times (-2) \\times (-2) = 16$."
+        },
+        {
+            q: "Simplifique: $\\frac{x^5}{x^2}$",
+            options: [
+                "$x^3$",
+                "$x^7$",
+                "$x^{5/2}$",
+                "$x^{2.5}$"
+            ],
+            correct: 0,
+            explanation: "$\\frac{x^5}{x^2} = x^{5-2} = x^3$."
+        },
+        {
+            q: "Convierta $0.75$ a fracción simplificada.",
+            options: [
+                "$\\frac{3}{4}$",
+                "$\\frac{75}{100}$",
+                "$\\frac{15}{20}$",
+                "$\\frac{7}{10}$"
+            ],
+            correct: 0,
+            explanation: "$0.75 = \\frac{75}{100} = \\frac{3}{4}$."
+        },
+        {
+            q: "Calcule el 35% de 200.",
+            options: [
+                "$70$",
+                "$35$",
+                "$65$",
+                "$80$"
+            ],
+            correct: 0,
+            explanation: "$200 \\times 0.35 = 70$."
+        },
+        {
+            q: "Simplifique: $\\sqrt[4]{16}$",
+            options: [
+                "$4$",
+                "$2$",
+                "$8$",
+                "$16$"
+            ],
+            correct: 1,
+            explanation: "$\\sqrt[4]{16} = 16^{1/4} = (2^4)^{1/4} = 2$."
+        },
+        {
+            q: "Traduzca al algebraico: 'El cuadrado de un número menos el triple del mismo número'.",
+            options: [
+                "$x^2 - 3x$",
+                "$(x-3)^2$",
+                "$x^2 - x^3$",
+                "$3x - x^2$"
+            ],
+            correct: 0,
+            explanation: "'El cuadrado de un número' = $x^2$. 'Menos el triple del mismo número' = $-3x$. Resultado: $x^2 - 3x$."
+        },
+        {
+            q: "Simplifique: $(2x^3)^2$",
+            options: [
+                "$4x^6$",
+                "$2x^6$",
+                "$4x^5$",
+                "$2x^9$"
+            ],
+            correct: 0,
+            explanation: "$(2x^3)^2 = 2^2 \\cdot x^{3\\cdot2} = 4x^6$."
+        },
+        {
+            q: "Calcule: $\\frac{7}{8} - \\frac{1}{4}$",
+            options: [
+                "$\\frac{5}{8}$",
+                "$\\frac{6}{8}$",
+                "$\\frac{3}{4}$",
+                "$\\frac{1}{2}$"
+            ],
+            correct: 0,
+            explanation: "$\\frac{7}{8} - \\frac{2}{8} = \\frac{5}{8}$."
+        }
+    ];
+
+    let currentQ = 0;
+    let correctCount = 0;
+    let errorCount = 0;
+    let studentName = "";
+    let answered = false;
+    const MAX_ERRORS = 10;
+
+    // Establecer fecha de hoy por defecto
+    const fechaInput = document.getElementById('fecha');
+    if (fechaInput) {
+        const hoy = new Date();
+        const año = hoy.getFullYear();
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        fechaInput.value = `${año}-${mes}-${dia}`;
+    }
+
+    function startQuiz() {
+        const nameInput = document.getElementById('nombre').value.trim();
+        const dateInput = document.getElementById('fecha').value;
+        if(!nameInput || !dateInput) {
+            alert("Por favor, ingresa tu nombre y la fecha.");
+            return;
+        }
+        studentName = nameInput;
+        document.getElementById('registro').classList.add('hidden');
+        document.getElementById('actividad').classList.remove('hidden');
+        loadQuestion();
+    }
+
+    function loadQuestion() {
+        answered = false;
+        const q = questions[currentQ];
+        document.getElementById('q-text').innerHTML = `<strong>Pregunta ${currentQ + 1} de ${questions.length}:</strong><br>${q.q}`;
+        const container = document.getElementById('options-container');
+        container.innerHTML = '';
+        
+        q.options.forEach((opt, i) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = opt;
+            btn.onclick = () => selectOption(i, btn);
+            container.appendChild(btn);
+        });
+        document.getElementById('feedback').style.display = 'none';
+        document.getElementById('btn-next').disabled = true;
+        updateStats();
+        
+        if (window.MathJax && MathJax.typesetPromise) {
+            MathJax.typesetPromise();
+        }
+    }
+
+    function selectOption(index, btn) {
+        if(answered) return;
+        document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        document.getElementById('btn-next').disabled = false;
+        btn.dataset.index = index;
+    }
+
+    function nextQuestion() {
+        if(!answered) {
+            const selected = document.querySelector('.option-btn.selected');
+            if(!selected) {
+                alert("Por favor, selecciona una respuesta antes de continuar.");
+                return;
+            }
+            const idx = parseInt(selected.dataset.index);
+            checkAnswer(idx);
+            answered = true;
+            document.getElementById('btn-next').innerText = (currentQ < questions.length - 1) ? "Siguiente Pregunta" : "Finalizar";
+            if (window.MathJax && MathJax.typesetPromise) {
+                MathJax.typesetPromise();
+            }
+        } else {
+            currentQ++;
+            if(currentQ < questions.length) {
+                loadQuestion();
+                document.getElementById('btn-next').innerText = "Siguiente";
+            } else {
+                showResults();
+            }
+        }
+    }
+
+    function checkAnswer(selectedIdx) {
+        const q = questions[currentQ];
+        const isCorrect = selectedIdx === q.correct;
+        const feedback = document.getElementById('feedback');
+        const btns = document.querySelectorAll('.option-btn');
+
+        btns.forEach(b => b.classList.add('disabled'));
+        btns[q.correct].classList.add('correct');
+
+        if(isCorrect) {
+            correctCount++;
+            feedback.className = "feedback correct";
+            feedback.innerHTML = "<strong>¡Excelente!</strong> " + q.explanation;
+        } else {
+            errorCount++;
+            btns[selectedIdx].classList.add('incorrect');
+            feedback.className = "feedback incorrect";
+            feedback.innerHTML = "<strong>Incorrecto.</strong> " + q.explanation;
+            
+            if(errorCount >= MAX_ERRORS) {
+                setTimeout(() => {
+                    alert(`Has alcanzado el límite de ${MAX_ERRORS} errores. Te recomendamos repasar: denominador común para fracciones, leyes de exponentes, simplificación de radicales y traducción de lenguaje ordinario a algebraico.`);
+                    location.reload();
+                }, 1500);
+            }
+        }
+        feedback.style.display = 'block';
+        updateStats();
+    }
+
+    function updateStats() {
+        document.getElementById('correct-count').innerText = correctCount;
+        document.getElementById('error-count').innerText = errorCount;
+        const prog = Math.round((currentQ / questions.length) * 100);
+        document.getElementById('progress-pct').innerText = prog + "%";
+        document.getElementById('progress-bar').style.width = prog + "%";
+    }
+
+    function showResults() {
+        document.getElementById('actividad').classList.add('hidden');
+        document.getElementById('resultados').classList.remove('hidden');
+        document.getElementById('student-name-display').innerText = studentName;
+        const score = Math.round((correctCount / questions.length) * 100);
+        document.getElementById('final-score').innerText = score + "%";
+        
+        let msg = score >= 80 ? 
+            "¡Excelente trabajo! Dominas los conceptos fundamentales de precálculo: fracciones, exponentes, radicales y álgebra básica." : 
+            "Buen esfuerzo. Te sugerimos repasar: denominador común para sumar/restar fracciones, leyes de exponentes (producto y cociente), simplificación de radicales y traducción de lenguaje ordinario a algebraico.";
+        document.getElementById('personal-message').innerText = msg;
+    }
+</script>
+</body>
+</html>
